@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor;
+using UnityEngine.Profiling;
 
 partial class CameraRenderer
 {
     partial void DrawUnsupportedShader();
     partial void DrawGizmos();
     partial void PrepareForSceneWin();
-    
+    partial void PrepareBuffer();
     static ShaderTagId[] _legacyShaderID =
     {
         new ShaderTagId("Always"),
@@ -20,8 +21,19 @@ partial class CameraRenderer
         new ShaderTagId("VertexLM")
     };
     static Material _errorMat;
+#if UNITY_EDITOR
+    string SampleName { get; set; }
+#endif
+    
+    
     
 #if UNITY_EDITOR
+    partial void PrepareBuffer()
+    {
+        Profiler.BeginSample("Editor Only");
+        _buffer.name = _camera.name;
+        Profiler.EndSample();
+    }
     partial void DrawGizmos()
     {
         if (UnityEditor.Handles.ShouldRenderGizmos())
@@ -56,5 +68,8 @@ partial class CameraRenderer
             ScriptableRenderContext.EmitWorldGeometryForSceneView(_camera);
         }
     }
+#else
+    String SampleName = bufferName;
 #endif
+    
 }
